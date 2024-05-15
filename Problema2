@@ -1,0 +1,39 @@
+#define trig 5
+#define echo 3 
+#define led 6
+int intensidad=0;
+
+void setup() {
+  pinMode(led, OUTPUT);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  Serial.begin(9600);
+  digitalWrite(trig, LOW);
+}
+
+void loop() {
+  long tiempo = 0;
+  long distancia = 0;
+
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+
+  tiempo=pulseIn(echo, HIGH);
+  distancia=tiempo/58.2;
+
+  intensidad=map(distancia,9,20,0,255); 
+
+  if (distancia<10) {
+    analogWrite(led, 0);
+  }else if (distancia>20) {
+    analogWrite(led, 255);
+  }else{
+    analogWrite(led,intensidad);
+  }
+
+  Serial.print("Distancia: ");
+  Serial.print(distancia);
+  Serial.println(" cm");
+  delay(150);
+}
