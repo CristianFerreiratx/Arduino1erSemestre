@@ -1,0 +1,50 @@
+#include "Adafruit_Sensor.h"
+#include "DHT.h"
+#include <ArduinoJson.h>
+
+
+#define pir 2
+#define led 3
+#define dht22 4
+
+
+#define DHTTYPE DHT22
+DHT dht = DHT(dht22, DHTTYPE);
+float humedad = 0.0;
+float temperatura = 0.0;
+
+void setup() {
+  pinMode(pir, INPUT);
+  pinMode(led, OUTPUT);
+  dht.begin();
+  delay(500);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (digitalRead(pir)==HIGH){
+    digitalWrite(led, HIGH);
+    LeerDHT22();
+    EnviarDatosJSON();
+    digitalWrite(led, LOW);
+    delay(500);
+  }
+}
+
+void LeerDHT22(){
+  // Read the humidity in %:
+  humedad = dht.readHumidity();
+  // Read the temperature as Celsius:
+  temperatura = dht.readTemperature();
+}
+
+void EnviarDatosJSON() {
+  StaticJsonDocument<200> doc;
+  doc["Humedad"] = humedad;
+  doc["Temperatura"] = temperatura;
+
+  String json;
+  serializeJson(doc, json);
+
+  Serial.println(json);
+}
