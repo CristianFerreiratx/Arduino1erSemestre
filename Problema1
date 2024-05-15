@@ -1,0 +1,23 @@
+#define led 2
+#define sensor A0
+
+void setup() {
+pinMode (sensor, INPUT);
+pinMode(led, OUTPUT);
+
+Serial.begin(9600);
+}
+
+void loop() {
+int luz=analogRead(sensor);
+int ValorMapeado=map(luz,0,1023,0,100);
+if (ValorMapeado>=50){
+  digitalWrite(led, HIGH);
+}else{
+  digitalWrite(led, LOW);
+}
+Serial.println(ValorMapeado);
+delay(1000);
+
+
+}
