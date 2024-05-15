@@ -1,0 +1,36 @@
+#include <ArduinoJson.h>
+#define led 2
+
+const float BETA = 3950; // should match the Beta Coefficient of the thermistor
+float ValorDefinido=23.00;
+float temperatura= 0.0;
+
+
+void setup() {
+  pinMode(led, OUTPUT);
+
+  Serial.begin(9600);
+}
+ 
+void loop() {
+  int analogValue = analogRead(A0);
+  temperatura= 1 / (log(1 / (1023. / analogValue - 1)) / BETA + 1.0 / 298.15) - 273.15;
+   if (temperatura>ValorDefinido) {
+    digitalWrite(led, HIGH);
+    EnviarDatosJSON();
+  } else {
+    digitalWrite(led, LOW);
+  }
+  delay(500);
+}
+
+void EnviarDatosJSON() {
+  StaticJsonDocument<200> doc;
+  doc["Temperatura"] = temperatura;
+
+  String json;
+  serializeJson(doc, json);
+
+  Serial.println(json);
+
+}
