@@ -1,0 +1,128 @@
+#include <ArduinoJson.h>
+ 
+#define ldr A0
+#define pot A1
+#define r 9
+#define g 10
+#define b 11
+
+int brillo= 0;
+int medicionPOT = 0;
+int colorRGB= 0;
+
+void setup() {
+ pinMode(ldr, INPUT);
+ pinMode(pot, INPUT);
+ pinMode(r, OUTPUT);
+ pinMode(g, OUTPUT);
+ pinMode(b, OUTPUT);
+
+ Serial.begin(9600);
+}
+
+void loop() {
+  brillo=LeerLDR();
+  if (brillo>= 80){
+    CambioDeColor(colorRGB);
+  }else{
+    analogWrite(r, 0);
+    analogWrite(g, 0);
+    analogWrite(b, 0);
+  }
+  EnviarDatosJSON();
+  delay(500);
+}
+
+int LeerLDR(){
+  int medicion = analogRead(ldr);
+  int ponderacion = map(medicion, 8, 1015, 0, 100);
+  return ponderacion;
+
+}
+
+void CambioDeColor(int medicionPOT){
+  medicionPOT=analogRead(pot);
+  colorRGB=map(medicionPOT, 0, 1023, 0, 80);
+    if (colorRGB<10){  //Rojo
+    analogWrite(r, 255);
+    analogWrite(g, 0);
+    analogWrite(b, 0);
+    }
+    if (colorRGB>=10 && colorRGB<20){ //Verde
+    analogWrite(r, 0);
+    analogWrite(g, 255);
+    analogWrite(b, 0);
+    }
+    if (colorRGB>=20 && colorRGB<30){ //Azul
+    analogWrite(r, 0);
+    analogWrite(g, 0);
+    analogWrite(b, 255);
+    }
+    if (colorRGB>=30 && colorRGB<40){ //Cafe
+    analogWrite(r, 103);
+    analogWrite(g, 33);
+    analogWrite(b, 20);
+    }
+    if (colorRGB>=40 && colorRGB<50){ //Amarillo
+    analogWrite(r, 255);
+    analogWrite(g, 255);
+    analogWrite(b, 0);
+    }
+    if (colorRGB>=50 && colorRGB<60){ //Violeta
+    analogWrite(r, 128);
+    analogWrite(g, 0);
+    analogWrite(b, 128);
+    }
+    if (colorRGB>=60 && colorRGB<70){ //Cyan
+    analogWrite(r, 0);
+    analogWrite(g, 255);
+    analogWrite(b, 255);
+    }
+   if (colorRGB>=70 && colorRGB<=80){ //Magenta
+    analogWrite(r, 255);
+    analogWrite(b, 255);
+    analogWrite(g, 0);
+   }
+}
+
+String LecturaColor(){
+  if (colorRGB<10){
+    return "Rojo";
+  }
+  if (colorRGB>=10 && colorRGB<20){
+    return "Verde";
+  }
+  if (colorRGB>=20&& colorRGB<30){
+    return "Azul";
+  }
+  if (colorRGB>=30 && colorRGB<40){
+    return "Café";
+  }
+  if (colorRGB>=40 && colorRGB<50){
+    return "Amarillo";
+  }
+  if (colorRGB>=50 && colorRGB<60){
+    return "Violeta";
+  }
+  if (colorRGB>=60 && colorRGB<70){
+    return "Cyan";
+  }
+  if (colorRGB>=70 && colorRGB<=80){
+    return "Magenta";
+  }
+}
+
+void EnviarDatosJSON() {
+  StaticJsonDocument<200> doc;
+  if (brillo >= 80) {
+    doc["Estado led"] = "encendido";
+    doc["Color led"] = LecturaColor();
+  } else {
+    doc["Estado led"] = "apagado";
+    delay(1500);
+  }
+  String json;
+  serializeJson(doc, json);
+
+  Serial.println(json);
+}
